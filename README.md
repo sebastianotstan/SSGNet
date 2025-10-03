@@ -7,7 +7,7 @@ This repository provides the official implementation of the paper:
 [ArXiv Preprint (coming soon)]() • [Conference Paper (BMVC Proceedings)]()
 
 <p align="center">
-  <img src="images/diagram_BMVC.pdf" width="800px">
+  <img src="images/diagram_BMVC.png" width="800px">
 </p>
 
 ---
