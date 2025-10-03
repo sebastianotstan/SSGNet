@@ -75,27 +75,27 @@ Some datasets are used in both tasks and require additional preprocessing steps.
 
 ```text
 datasets/
-├── cbisddsm/
+├── CBIS-DDSM/
 │   ├── images/
 │   ├── masks/                 # segmentation masks
 │   ├── classification/        # classification-ready splits
 │   └── preprocessing/         # scripts for dicom2png, ROI extraction etc.
-├── kvasirseg/
+├── Kvasir-SEG/
 │   ├── images/
 │   ├── masks/
 │   ├── classification/
 │   └── preprocessing/
-├── isic2017/
+├── ISIC2017/
 │   ├── images/
 │   └── masks/
-├── isic2018/
+├── ISIC2018/
 │   ├── images/
 │   └── masks/
-├── chestxray/
+├── ChestX-Ray/
 │   ├── train/
 │   ├── val/
 │   └── test/
-└── breastmnist/
+└── BreastMNIST/
     ├── train/
     ├── val/
     └── test/
