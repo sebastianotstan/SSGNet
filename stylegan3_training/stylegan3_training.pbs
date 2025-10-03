@@ -1,0 +1,110 @@
+#!/bin/bash
+#===============================================================================
+# File: train_stylegan3.pbs
+# Purpose: Submit a StyleGAN3 training job to a PBS/Torque HPC cluster
+# Usage:
+#   qsub -N sg3_polyps_pos \
+#        -v DATA_ZIP=dataset/polyps/positive.zip,OUTDIR=tr_result/polyps/positive,CFG=stylegan3-t,GPUS=1,BATCH=32,BATCH_GPU=16,GAMMA=2,SNAP=20,RESUME=resume/polyps_p_tr.pkl \
+#        train_stylegan3.pbs
+#
+# Notes:
+#  - Edit the module/conda lines to match your cluster.
+#  - You can also hardcode variables below instead of passing with -v.
+#===============================================================================
+
+#----- PBS resources ------------------------------------------------------------
+# Adjust resources to your queue policy
+#PBS -l select=1:ncpus=8:mem=128gb:ngpus=1
+#PBS -l walltime=60:00:00
+
+# Optional: queue, account, email notifications
+#PBS -q default
+#PBS -A your_account
+#PBS -m abe
+#PBS -M your_email@example.com
+
+# Stop on first error, treat unset vars as errors, fail on pipe errors
+set -euo pipefail
+
+# Go to submit directory
+cd "$PBS_O_WORKDIR"
+
+#----- User-configurable variables (can be overridden via qsub -v) --------------
+DATA_ZIP="${DATA_ZIP:-dataset/polyps/positive.zip}"      # path to .zip created by dataset_tool
+OUTDIR="${OUTDIR:-tr_result/polyps/positive}"            # training-runs output directory
+CFG="${CFG:-stylegan3-t}"                                # stylegan3-t or stylegan3-r
+GPUS="${GPUS:-1}"                                       
+BATCH="${BATCH:-32}"
+BATCH_GPU="${BATCH_GPU:-16}"                             # per-GPU batch
+GAMMA="${GAMMA:-2}"
+SNAP="${SNAP:-20}"                                       # snapshot interval
+RESUME="${RESUME:-}"                                     # optional .pkl to resume from (empty = fresh)
+
+# Optional: set a run name tag
+RUN_TAG="${RUN_TAG:-polyps_pos}"
+
+# Create output/log directories
+LOGDIR="${OUTDIR}/logs"
+mkdir -p "$OUTDIR" "$LOGDIR"
+
+#----- Environment setup (edit for your cluster) --------------------------------
+module purge
+module load anaconda3/personal
+module unload CUDA || true
+module load tools/prod
+module load CUDA/11.1.1-GCC-10.2.0
+
+# Activate conda env that has StyleGAN3 deps installed
+# Use modern conda activation (falls back to older 'source activate' if needed)
+if command -v conda >/dev/null 2>&1; then
+    eval "$(conda shell.bash hook)"
+    conda activate stylegan3 || source activate stylegan3
+else
+    # If conda not on PATH, try the default profile
+    source ~/.bashrc
+    eval "$(conda shell.bash hook)"
+    conda activate stylegan3 || source activate stylegan3
+fi
+
+# Print some diagnostics
+echo "===== JOB INFO ====="
+echo "Job ID:     ${PBS_JOBID:-N/A}"
+echo "Work dir:   $(pwd)"
+echo "Host:       $(hostname)"
+echo "CUDA:       $(nvcc --version 2>/dev/null | head -n1 || echo 'nvcc not found')"
+echo "GPUs:       ${GPUS}"
+echo "============ ======="
+
+#----- Build the python command -------------------------------------------------
+PY_CMD=( python train.py
+    "--outdir=${OUTDIR}"
+    "--data=${DATA_ZIP}"
+    "--cfg=${CFG}"
+    "--gpus=${GPUS}"
+    "--batch=${BATCH}"
+    "--gamma=${GAMMA}"
+    "--batch-gpu=${BATCH_GPU}"
+    "--snap=${SNAP}"
+)
+
+# Resume (optional)
+if [[ -n "${RESUME}" ]]; then
+    PY_CMD+=( "--resume=${RESUME}" )
+fi
+
+# Optional seed / fp32 flags (uncomment/edit as needed)
+# PY_CMD+=( "--seed=0" )
+# PY_CMD+=( "--fp32" )   # if you want to force FP32
+
+#----- Run ----------------------------------------------------------------------
+echo "Running:"
+printf ' %q' "${PY_CMD[@]}"; echo
+
+# Redirect stdout/stderr to a timestamped log inside OUTDIR/logs
+ts="$(date +'%Y%m%d_%H%M%S')"
+LOGFILE="${LOGDIR}/train_${RUN_TAG}_${ts}.log"
+
+# Launch
+"${PY_CMD[@]}" 2>&1 | tee -a "${LOGFILE}"
+
+echo "Done. Logs saved to: ${LOGFILE}"
