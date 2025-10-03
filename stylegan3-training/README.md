@@ -51,10 +51,11 @@ Some datasets are used in both tasks and require additional preprocessing steps.
 
 - **CBIS-DDSM**  
   Convert raw DICOM images to PNG/JPG. Extract ROI patches for both segmentation and classification tasks.  
+  Crop converted image and have the tumor region centered for easier analysis.
   Normalization recommended before training.
 
 - **Kvasir-SEG**  
-  Resize all images and masks to a fixed size (e.g., 256×256).  
+  Cut all images and masks to multiple fixed size patches (e.g., 256×256).  
   Use binary masks for segmentation. For classification, convert to polyp vs non-polyp labels.
 
 - **ISIC 2017 & 2018**  
@@ -71,37 +72,34 @@ Some datasets are used in both tasks and require additional preprocessing steps.
 ---
 
 ## Folder Structure (Example)
-  datasets/
-  │
-  ├── cbisddsm/
-  │ ├── images/
-  │ ├── masks/ # segmentation masks
-  │ ├── classification/ # classification-ready splits
-  │ └── preprocessing/ # scripts for dicom2png, ROI extraction
-  │
-  ├── kvasirseg/
-  │ ├── images/
-  │ ├── masks/
-  │ ├── classification/
-  │ └── preprocessing/
-  │
-  ├── isic2017/
-  │ ├── images/
-  │ └── masks/
-  │
-  ├── isic2018/
-  │ ├── images/
-  │ └── masks/
-  │
-  ├── chestxray/
-  │ ├── train/
-  │ ├── val/
-  │ └── test/
-  │
-  └── breastmnist/
-  ├── train/
-  ├── val/
-  └── test/
+
+```text
+datasets/
+├── cbisddsm/
+│   ├── images/
+│   ├── masks/                 # segmentation masks
+│   ├── classification/        # classification-ready splits
+│   └── preprocessing/         # scripts for dicom2png, ROI extraction etc.
+├── kvasirseg/
+│   ├── images/
+│   ├── masks/
+│   ├── classification/
+│   └── preprocessing/
+├── isic2017/
+│   ├── images/
+│   └── masks/
+├── isic2018/
+│   ├── images/
+│   └── masks/
+├── chestxray/
+│   ├── train/
+│   ├── val/
+│   └── test/
+└── breastmnist/
+    ├── train/
+    ├── val/
+    └── test/
+
 
 
 ---
