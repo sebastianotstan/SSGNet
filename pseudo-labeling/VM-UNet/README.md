@@ -73,6 +73,41 @@ python train_synapse.py  # Train and test VM-UNet on the Synapse dataset.
 ## 4. Obtain the outputs
 - After trianing, you could obtain the results in './results/'
 
-## 5. Acknowledgments
+## 5. Add All Generated Images into the Original Dataset
+
+After each round, merge the newly generated pseudo-labeled masks into your training dataset.
+
+Example folder structure:
+dataset/
+├── train/
+│   ├── images/
+│   │   ├── original_001.png
+│   │   ├── original_002.png
+│   │   ├── pseudo_001_r1.png   # new pseudo-labeled image (round 1)
+│   │   └── pseudo_001_r2.png   # updated pseudo-label (round 2)
+│   └── masks/
+│       ├── original_001_mask.png
+│       ├── original_002_mask.png
+│       ├── pseudo_001_mask_r1.png
+│       └── pseudo_001_mask_r2.png
+
+
+
+## 6. Train the Model Iteratively and Update Pseudo-Labels
+
+The iterative pseudo-labeling loop is as follows:
+
+1. **Train** VM-UNet on the current labeled + pseudo-labeled dataset.
+2. **Predict** masks for the unlabeled set using the trained model.
+3. **Select or overwrite** pseudo-labels based on confidence or Dice threshold.
+4. **Merge** new pseudo-labels into the training dataset.
+5. **Repeat** until performance converges.
+
+You can define convergence as:
+- No significant improvement in validation Dice for 2–3 rounds.
+- A performance change smaller than `0.001`.
+
+
+## 7. Acknowledgments
 
 - We thank the authors of [VMamba](https://github.com/MzeroMiko/VMamba) and [Swin-UNet](https://github.com/HuCaoFighting/Swin-Unet) for their open-source codes.
