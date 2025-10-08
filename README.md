@@ -4,7 +4,7 @@ This repository provides the official implementation of the paper:
 
 **"Towards Data-Efficient Medical Imaging: A Generative and Semi-Supervised Framework" (BMVC 2025)**  
 
-[ArXiv Preprint (coming soon)]() • [Conference Paper (BMVC Proceedings)]()
+[ArXiv Preprint (https://arxiv.org/abs/2510.06123)]() • [Conference Paper (BMVC Proceedings)]()
 
 <p align="center">
   <img src="images/diagram_BMVC.png" width="800px">
